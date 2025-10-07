@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Terminal</title>
+  <title>Zortibozuk // Terminal</title>
   <style>
     body {
       background-color: #000;
@@ -13,6 +13,7 @@
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
+      position: relative;
     }
     #output { white-space: pre-wrap; }
     .cursor {
@@ -21,23 +22,63 @@
       background-color: #00ff80;
       animation: blink 1s step-end infinite;
     }
-    @keyframes blink {
-      50% { background-color: transparent; }
-    }
-    a {
+    @keyframes blink { 50% { background-color: transparent; } }
+
+    /* Mini UI box */
+    #ui {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+      border: 1px solid #00ff80;
+      padding: 10px 15px;
+      font-size: 14px;
+      line-height: 1.4;
       color: #00ffaa;
-      text-decoration: none;
+      background-color: rgba(0,0,0,0.5);
+      border-radius: 6px;
     }
-    a:hover { text-decoration: underline; }
+    #ui span {
+      color: #00ff80;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div id="output"></div>
+
+  <div id="ui">
+    <div><span>W</span> Projects</div>
+    <div><span>A</span> About</div>
+    <div><span>S</span> Contact</div>
+    <div><span>D</span> Back</div>
+  </div>
+
   <script>
     const output = document.getElementById("output");
 
+    // ASCII Logo (Senin logonu temsil eden soyut ASCII versiyon)
+    const asciiLogo = [
+"       ___             _ _            _        ",
+"      |__ \\           | | |          | |       ",
+"         ) | ___   ___| | | ___   ___| | _____ ",
+"        / / / _ \\ / __| | |/ _ \\ / __| |/ / __|",
+"       / /_| (_) | (__| | | (_) | (__|   <\\__ \\",
+"      |____|\\___/ \\___|_|_|\\___/ \\___|_|\\_\\___/",
+"",
+"                    ZORTIBOZUK SYSTEM v1.2",
+"--------------------------------------------------",
+"Initializing core modules...",
+""
+    ];
+
     const sections = {
-      main: [],
+      main: [
+        "Welcome traveler!",
+        "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
+        "This portfolio runs on an experimental terminal system ⚙️",
+        "",
+        "Use [W][A][S][D] to navigate."
+      ],
       projects: [
         ">>> Accessing Projects...",
         "",
@@ -45,16 +86,16 @@
         "🪶 Loop — upcycled kitesurf brand identity inspired by wind traces and motion loops.",
         "💀 Grunge Matchbox — 90s analog matchbox collection with symbolic illustration series.",
         "",
-        "[B] Back"
+        "[D] Back"
       ],
       about: [
         ">>> Accessing About...",
         "",
         "I’m a multidisciplinary designer and kitesurf instructor.",
-        "My work often explores symbolism, abstraction, and rhythm — both in visuals and movement.",
-        "Currently building visuals under the name ‘Zortibozuk’.",
+        "My work explores symbolism, abstraction, and rhythm — both in visuals and motion.",
+        "Currently working under the alias ‘Zortibozuk’.",
         "",
-        "[B] Back"
+        "[D] Back"
       ],
       contact: [
         ">>> Accessing Contact...",
@@ -62,12 +103,10 @@
         "📧 Email: yourname@example.com",
         "📸 Instagram: @yourhandle",
         "",
-        "[B] Back"
+        "[D] Back"
       ]
     };
 
-    const menuItems = ["projects", "about", "contact"];
-    let currentIndex = 0;
     let currentSection = "main";
 
     function typeLines(lines, callback) {
@@ -83,73 +122,40 @@
               clearInterval(interval);
               output.innerHTML += "\n";
               i++;
-              setTimeout(typeLine, 80);
+              setTimeout(typeLine, 70);
             }
-          }, 10);
-        } else if (callback) {
-          output.innerHTML += '<span class="cursor"></span>';
-          callback();
+          }, 8);
         } else {
           output.innerHTML += '<span class="cursor"></span>';
+          if (callback) callback();
         }
       }
       typeLine();
     }
 
-    function updateMainMenu() {
-      const lines = [
-        "Portfolio Terminal v1.0",
-        "-----------------------------------",
-        "Initializing system...",
-        "",
-        "Welcome traveler!",
-        "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
-        "This portfolio runs on an experimental system ",
-        "",
-      ];
-      menuItems.forEach((item, i) => {
-        let label = "";
-        if (item === "projects") label = "[1] Projects";
-        else if (item === "about") label = "[2] About";
-        else if (item === "contact") label = "[3] Contact";
-        if (i === currentIndex) label = "> " + label;
-        lines.push(label);
-      });
-      lines.push("", "Use W/S or A/D to navigate, Enter to select.");
+    function loadSection(sectionName) {
       output.innerHTML = "";
-      typeLines(lines);
+      typeLines(sections[sectionName]);
+      currentSection = sectionName;
     }
 
-    function loadSection(sectionName) {
-      currentSection = sectionName;
-      if (sectionName === "main") {
-        currentIndex = 0;
-        updateMainMenu();
-      } else {
-        output.innerHTML = "";
-        typeLines(sections[sectionName]);
-      }
+    function startTerminal() {
+      output.innerHTML = "";
+      typeLines(asciiLogo, () => typeLines(sections.main));
     }
 
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       if (currentSection === "main") {
-        if (key === "w" || key === "a") {
-          currentIndex = (currentIndex - 1 + menuItems.length) % menuItems.length;
-          updateMainMenu();
-        } else if (key === "s" || key === "d") {
-          currentIndex = (currentIndex + 1) % menuItems.length;
-          updateMainMenu();
-        } else if (key === "enter") {
-          loadSection(menuItems[currentIndex]);
-        }
+        if (key === "w") loadSection("projects");
+        else if (key === "a") loadSection("about");
+        else if (key === "s") loadSection("contact");
       } else {
-        if (key === "b") loadSection("main");
+        if (key === "d") loadSection("main");
       }
     });
 
-    // Başlangıç
-    loadSection("main");
+    startTerminal();
   </script>
 </body>
 </html>
