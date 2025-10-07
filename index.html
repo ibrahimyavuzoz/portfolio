@@ -37,21 +37,7 @@
     const output = document.getElementById("output");
 
     const sections = {
-      main: [
-        "Portfolio Terminal v1.0",
-        "-----------------------------------",
-        "Initializing system...",
-        "",
-        "Welcome traveler!",
-        "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
-        "This portfolio runs on an experimental system ",
-        "",
-        "[1] Projects",
-        "[2] About",
-        "[3] Contact",
-        "",
-        "Enter a command: "
-      ],
+      main: [],
       projects: [
         ">>> Accessing Projects...",
         "",
@@ -80,6 +66,8 @@
       ]
     };
 
+    const menuItems = ["projects", "about", "contact"];
+    let currentIndex = 0;
     let currentSection = "main";
 
     function typeLines(lines, callback) {
@@ -108,23 +96,59 @@
       typeLine();
     }
 
-    function loadSection(sectionName) {
+    function updateMainMenu() {
+      const lines = [
+        "Portfolio Terminal v1.0",
+        "-----------------------------------",
+        "Initializing system...",
+        "",
+        "Welcome traveler!",
+        "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
+        "This portfolio runs on an experimental system ",
+        "",
+      ];
+      menuItems.forEach((item, i) => {
+        let label = "";
+        if (item === "projects") label = "[1] Projects";
+        else if (item === "about") label = "[2] About";
+        else if (item === "contact") label = "[3] Contact";
+        if (i === currentIndex) label = "> " + label;
+        lines.push(label);
+      });
+      lines.push("", "Use W/S or A/D to navigate, Enter to select.");
       output.innerHTML = "";
-      typeLines(sections[sectionName]);
+      typeLines(lines);
+    }
+
+    function loadSection(sectionName) {
       currentSection = sectionName;
+      if (sectionName === "main") {
+        currentIndex = 0;
+        updateMainMenu();
+      } else {
+        output.innerHTML = "";
+        typeLines(sections[sectionName]);
+      }
     }
 
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
       if (currentSection === "main") {
-        if (key === "1") loadSection("projects");
-        else if (key === "2") loadSection("about");
-        else if (key === "3") loadSection("contact");
+        if (key === "w" || key === "a") {
+          currentIndex = (currentIndex - 1 + menuItems.length) % menuItems.length;
+          updateMainMenu();
+        } else if (key === "s" || key === "d") {
+          currentIndex = (currentIndex + 1) % menuItems.length;
+          updateMainMenu();
+        } else if (key === "enter") {
+          loadSection(menuItems[currentIndex]);
+        }
       } else {
         if (key === "b") loadSection("main");
       }
     });
 
+    // Başlangıç
     loadSection("main");
   </script>
 </body>
