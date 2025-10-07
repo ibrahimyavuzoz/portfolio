@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zortibozuk // Portfolyo</title>
+  <title>Zortibozuk // Portfolio Terminal</title>
   <style>
     body {
       background-color: #000;
       color: #00ff80;
       font-family: 'Courier New', monospace;
       padding: 40px;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
-    h1 {
-      color: #00ffaa;
-    }
+
     .cursor {
       display: inline-block;
       width: 10px;
@@ -25,6 +24,7 @@
     @keyframes blink {
       50% { background-color: transparent; }
     }
+
     a {
       color: #00ffaa;
       text-decoration: none;
@@ -32,13 +32,54 @@
     a:hover {
       text-decoration: underline;
     }
+
+    #output {
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
-  <h1>👾 Welcome to Terminal</h1>
-  <p>Hello,<br>
-  I am <b>İbrahim Yavuzöz</b> — Graphic Designer.<br>
-  ...building...<span class="cursor"></span></p>
-  <p>[<a href="#">Projects</a>] [<a href="#">Contact</a>] [<a href="#">About Me</a>]</p>
+  <div id="output"></div>
+  <script>
+    const text = [
+      "👾 Zortibozuk Terminal v1.0",
+      "-----------------------------------",
+      "Initializing system...",
+      "",
+      "Welcome traveler!",
+      "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
+      "This portfolio runs on an experimental system ⚙️",
+      "",
+      "[1] Projects",
+      "[2] About",
+      "[3] Contact",
+      "",
+      "Enter a command: "
+    ];
+
+    let index = 0;
+    const output = document.getElementById("output");
+
+    function typeLine() {
+      if (index < text.length) {
+        let line = text[index];
+        let i = 0;
+        const lineInterval = setInterval(() => {
+          output.innerHTML += line[i];
+          i++;
+          if (i >= line.length) {
+            clearInterval(lineInterval);
+            output.innerHTML += "\n";
+            index++;
+            setTimeout(typeLine, 200);
+          }
+        }, 30);
+      } else {
+        output.innerHTML += '<span class="cursor"></span>';
+      }
+    }
+
+    typeLine();
+  </script>
 </body>
 </html>
