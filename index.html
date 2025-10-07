@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zortibozuk // Portfolio Terminal</title>
+  <title>Portfolio Terminal</title>
   <style>
     body {
       background-color: #000;
@@ -14,7 +14,7 @@
       margin: 0 auto;
       line-height: 1.6;
     }
-
+    #output { white-space: pre-wrap; }
     .cursor {
       display: inline-block;
       width: 10px;
@@ -24,62 +24,108 @@
     @keyframes blink {
       50% { background-color: transparent; }
     }
-
     a {
       color: #00ffaa;
       text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
-    }
-
-    #output {
-      white-space: pre-wrap;
-    }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div id="output"></div>
   <script>
-    const text = [
-      "👾 Portfolio Terminal v1.0",
-      "-----------------------------------",
-      "Initializing system...",
-      "",
-      "Welcome traveler!",
-      "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
-      "This portfolio runs on an experimental system ⚙️",
-      "",
-      "[1] Projects",
-      "[2] About",
-      "[3] Contact",
-      "",
-      "Enter a command: "
-    ];
-
-    let index = 0;
     const output = document.getElementById("output");
 
-    function typeLine() {
-      if (index < text.length) {
-        let line = text[index];
-        let i = 0;
-        const lineInterval = setInterval(() => {
-          output.innerHTML += line[i];
-          i++;
-          if (i >= line.length) {
-            clearInterval(lineInterval);
-            output.innerHTML += "\n";
-            index++;
-            setTimeout(typeLine, 200);
-          }
-        }, 30);
-      } else {
-        output.innerHTML += '<span class="cursor"></span>';
+    const sections = {
+      main: [
+        "Portfolio Terminal v1.0",
+        "-----------------------------------",
+        "Initializing system...",
+        "",
+        "Welcome traveler!",
+        "I'm Ibrahim Yavuzöz — graphic designer, kitesurf instructor, and visual experimenter.",
+        "This portfolio runs on an experimental system ",
+        "",
+        "[1] Projects",
+        "[2] About",
+        "[3] Contact",
+        "",
+        "Enter a command: "
+      ],
+      projects: [
+        ">>> Accessing Projects...",
+        "",
+        "🌀 PolarBeat — a neo-vectorheart apparel concept merging rhythm and altitude.",
+        "🪶 Loop — upcycled kitesurf brand identity inspired by wind traces and motion loops.",
+        "💀 Grunge Matchbox — 90s analog matchbox collection with symbolic illustration series.",
+        "",
+        "[B] Back"
+      ],
+      about: [
+        ">>> Accessing About...",
+        "",
+        "I’m a multidisciplinary designer and kitesurf instructor.",
+        "My work often explores symbolism, abstraction, and rhythm — both in visuals and movement.",
+        "Currently building visuals under the name ‘Zortibozuk’.",
+        "",
+        "[B] Back"
+      ],
+      contact: [
+        ">>> Accessing Contact...",
+        "",
+        "📧 Email: yourname@example.com",
+        "📸 Instagram: @yourhandle",
+        "",
+        "[B] Back"
+      ]
+    };
+
+    let currentSection = "main";
+
+    function typeLines(lines, callback) {
+      let i = 0;
+      function typeLine() {
+        if (i < lines.length) {
+          let line = lines[i];
+          let j = 0;
+          const interval = setInterval(() => {
+            output.innerHTML += line[j] || "";
+            j++;
+            if (j >= line.length) {
+              clearInterval(interval);
+              output.innerHTML += "\n";
+              i++;
+              setTimeout(typeLine, 80);
+            }
+          }, 10);
+        } else if (callback) {
+          output.innerHTML += '<span class="cursor"></span>';
+          callback();
+        } else {
+          output.innerHTML += '<span class="cursor"></span>';
+        }
       }
+      typeLine();
     }
 
-    typeLine();
+    function loadSection(sectionName) {
+      output.innerHTML = "";
+      typeLines(sections[sectionName]);
+      currentSection = sectionName;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      if (currentSection === "main") {
+        if (key === "1") loadSection("projects");
+        else if (key === "2") loadSection("about");
+        else if (key === "3") loadSection("contact");
+      } else {
+        if (key === "b") loadSection("main");
+      }
+    });
+
+    loadSection("main");
   </script>
 </body>
 </html>
