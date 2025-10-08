@@ -1,189 +1,383 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PolarBeat Console</title>
-  <style>
-    body {
-      background: radial-gradient(circle at center, #111 0%, #000 100%);
-      font-family: "Share Tech Mono", monospace;
-      color: #99ffee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      margin: 0;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PolarBeat Interface — v2</title>
+<style>
+  :root{
+    --bg-1: #071017;
+    --bg-2: #0b1116;
+    --hud: rgba(0,255,214,0.06);
+    --accent: #00ffd6;
+    --accent-dim: rgba(0,255,214,0.14);
+    --warm: #ffbf6b;
+    --panel: #0e1316;
+    --glass: rgba(255,255,255,0.03);
+    --muted: #8fbfb0;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family: "Courier New", "IBM Plex Mono", monospace;background:
+    radial-gradient(1200px 600px at 10% 10%, #07121a 0%, transparent 10%),
+    linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 100%); color:var(--accent); -webkit-font-smoothing:antialiased;}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
 
-    .console {
-      background: #0a0a0a;
-      border: 2px solid #00ffbf33;
-      box-shadow: 0 0 30px #00ffbf22;
-      border-radius: 12px;
-      padding: 30px 40px;
-      width: 600px;
-      max-width: 90%;
-      text-align: center;
-    }
+  /* shell */
+  .shell{
+    width:min(980px, 96%);
+    max-width:980px;
+    border-radius:14px;
+    padding:18px;
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.003));
+    border:1px solid rgba(0,255,214,0.06);
+    box-shadow: 0 30px 60px rgba(2,6,10,0.75), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
 
-    .title {
-      font-size: 1.2em;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-      color: #00ffbf;
-      text-shadow: 0 0 10px #00ffbf77;
-    }
+  /* left: HUD / display */
+  .hud{
+    padding:18px;
+    border-radius:10px;
+    background: linear-gradient(180deg, #071217, #061018);
+    min-height:360px;
+    position:relative;
+    overflow:hidden;
+    border:1px solid var(--hud);
+  }
+  .hud::before{
+    content:'';
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 15%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.002), rgba(255,255,255,0.002) 2px, transparent 2px, transparent 6px);
+    mix-blend-mode:overlay;
+  }
 
-    .display {
-      background: #030303;
-      border: 1px solid #00ffbf55;
-      height: 160px;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 25px;
-      overflow: hidden;
-      box-shadow: inset 0 0 20px #00ffbf11;
-    }
+  .brand{
+    display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  }
+  .badge{
+    width:56px;height:56px;border-radius:8px;background:linear-gradient(180deg,#021918,#072828);
+    display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,214,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    font-weight:700;color:var(--accent);
+  }
+  .brand h1{font-size:1.05rem;margin:0;color:var(--accent);letter-spacing:1.2px}
+  .brand p{margin:0;font-size:12px;color:var(--muted)}
 
-    .display p {
-      margin: 0;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
-    }
+  .screen{
+    margin-top:6px;
+    background: linear-gradient(180deg, rgba(3,14,12,0.98), rgba(0,6,6,0.98));
+    border-radius:8px;padding:18px;border:1px solid rgba(0,255,214,0.04);
+    min-height:220px; display:flex;flex-direction:column;gap:10px; justify-content:center;
+    box-shadow: inset 0 6px 40px rgba(0,0,0,0.7), 0 6px 30px rgba(0,0,0,0.6);
+  }
 
-    .display p.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .title{
+    display:flex;align-items:center;gap:12px;
+  }
+  .title .tleft{font-size:13px;color:var(--accent);opacity:0.98}
+  .title .tright{font-size:11px;color:var(--muted);opacity:0.9}
 
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
+  .content{
+    font-size:14px;line-height:1.6;color:#cfffe9; opacity:0.98;
+    transform-origin:left center; transition: transform .36s cubic-bezier(.2,.9,.2,1), opacity .28s;
+  }
+  .content.small{font-size:13px;color:#bfeee0}
+  .pulse{
+    display:inline-block; height:6px;width:6px;border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent);
+    margin-left:8px; opacity:0; transform:scale(.7); animation: breathe 2s infinite;
+  }
+  @keyframes breathe{0%{opacity:.16;transform:scale(.8)}50%{opacity:1;transform:scale(1)}100%{opacity:.16;transform:scale(.8)}}
 
-    .btn {
-      background: #050505;
-      border: 1px solid #00ffbf55;
-      color: #99ffee;
-      width: 50px;
-      height: 50px;
-      border-radius: 8px;
-      font-size: 1.2em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 8px #00ffbf22;
-    }
+  /* bottom tiny HUD lines */
+  .hud-lines{display:flex;gap:12px;margin-top:14px;font-size:12px;color:var(--muted);opacity:.9}
+  .chip{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.004)); padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.02); color:var(--muted)}
 
-    .btn:hover {
-      background: #00ffbf22;
-      box-shadow: 0 0 12px #00ffbf55;
-    }
+  /* right: menu / controls */
+  .panel{
+    padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.004));
+    border:1px solid rgba(255,255,255,0.02); display:flex;flex-direction:column; gap:12px;
+  }
+  .nav{display:flex;flex-direction:column;gap:10px}
+  .nav button{
+    text-align:left;padding:12px;border-radius:8px;background:linear-gradient(180deg,#071216,#041014);
+    color:var(--accent);border:1px solid rgba(0,255,214,0.04); font-weight:700; cursor:pointer;
+    display:flex;justify-content:space-between; align-items:center; gap:8px; font-size:14px;
+    transition: transform .12s, box-shadow .12s, background .12s;
+  }
+  .nav button:hover{ transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+  .nav button.active{ background: linear-gradient(180deg,#003c37,#002a25); color:white; box-shadow:0 20px 40px rgba(0,80,70,0.24); border:1px solid rgba(0,255,214,0.18) }
 
-    .led {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #003300;
-      margin: 10px auto;
-      box-shadow: 0 0 5px #003300;
-    }
+  .nav .hint{ font-size:12px; color:var(--muted); opacity:.9 }
 
-    .led.active {
-      background: #00ff88;
-      box-shadow: 0 0 15px #00ff88aa;
-    }
+  .controls{display:flex;gap:8px; margin-top:6px}
+  .control{
+    flex:1; padding:10px;border-radius:8px;background:var(--panel); border:1px solid rgba(255,255,255,0.02);
+    text-align:center;color:var(--muted); font-weight:700; cursor:pointer;
+  }
+  .control:active{ transform:translateY(2px) }
 
-    @keyframes flicker {
-      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
-      20%, 24%, 55% { opacity: 0.4; }
-    }
+  .meters{display:flex;gap:10px; margin-top:8px; align-items:center}
+  .meter{flex:1;height:6px;border-radius:6px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.006)); overflow:hidden}
+  .meter > i{display:block;height:100%; width:0%; background: linear-gradient(90deg,var(--accent),var(--warm)); box-shadow:0 6px 24px rgba(0,255,214,0.06), inset 0 -6px 20px rgba(255,191,107,0.04); transition: width .8s ease}
 
-    .startup {
-      animation: flicker 2s infinite;
-      font-size: 0.9em;
-      color: #00ffbf77;
-    }
-  </style>
+  /* small foot */
+  .foot{font-size:12px;color:var(--muted); margin-top:12px; opacity:.95}
+
+  /* subtle intro animation */
+  .boot {
+    position:absolute; inset:0; display:flex;align-items:center;justify-content:center; background:linear-gradient(180deg, rgba(2,8,8,0.5), rgba(0,0,0,0.6));
+    z-index:6; color:var(--accent); font-size:13px; flex-direction:column; gap:8px;
+    backdrop-filter: blur(2px);
+  }
+  .boot p{ margin:0; opacity:.95; letter-spacing:0.6px }
+  .progress{ width:260px; height:8px; border-radius:999px; background:rgba(255,255,255,0.03); overflow:hidden; border:1px solid rgba(255,255,255,0.02) }
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--warm)); box-shadow:0 6px 30px rgba(0,255,214,0.06); transition: width 1s linear }
+
+  /* responsiveness */
+  @media (max-width:920px){
+    .shell{grid-template-columns:1fr; padding:12px}
+    .nav{flex-direction:row; overflow:auto}
+    .nav button{min-width:140px; flex:1 0 auto}
+    .panel{order:2}
+    .hud{order:1}
+  }
+</style>
 </head>
 <body>
-  <div class="console">
-    <div class="title">POLARBEAT CONSOLE v1.0</div>
-    <div class="display" id="display">
-      <p class="startup">Insert tape... Loading PolarBeat...</p>
-    </div>
-    <div class="led" id="led"></div>
-    <div class="buttons">
-      <button class="btn" id="prev">⏮</button>
-      <button class="btn" id="play">▶</button>
-      <button class="btn" id="stop">⏹</button>
-      <button class="btn" id="next">⏭</button>
+  <div class="wrap">
+    <div class="shell" role="application" aria-label="PolarBeat Interface">
+      <div class="hud" id="hud">
+        <div class="brand">
+          <div class="badge">PB</div>
+          <div>
+            <h1>POLARBEAT INTERFACE</h1>
+            <p>v2 — analog-digital hybrid UI</p>
+          </div>
+        </div>
+
+        <div class="screen" id="screen" aria-live="polite">
+          <div class="title">
+            <div class="tleft" id="screen-title">Welcome</div>
+            <div class="tright" id="screen-sub">system idle</div>
+          </div>
+          <div class="content" id="screen-content">
+            <p>Booting interface…</p>
+            <p class="small" style="margin-top:8px;color:var(--muted)">Use ← / → to navigate, Enter to open, Esc to go back. Click the buttons on the right.</p>
+          </div>
+        </div>
+
+        <div class="hud-lines">
+          <div class="chip" id="status-chip">STATUS: IDLE</div>
+          <div class="chip" id="clock-chip">LAST SAVE: —</div>
+          <div class="chip" id="mode-chip">MODE: EXPLORATION</div>
+        </div>
+
+        <div class="foot">Designed for Zortibozuk • Portfolio prototype</div>
+      </div>
+
+      <aside class="panel" aria-label="menu panel">
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+          <button data-key="projects" class="active"><span>Projects</span><span class="hint">01</span></button>
+          <button data-key="about"><span>About</span><span class="hint">02</span></button>
+          <button data-key="contact"><span>Contact</span><span class="hint">03</span></button>
+        </nav>
+
+        <div class="controls" role="group" aria-label="quick controls">
+          <div class="control" id="btn-open">Open ⏎</div>
+          <div class="control" id="btn-back">Back ⎋</div>
+        </div>
+
+        <div class="meters">
+          <div class="meter"><i id="meter-i"></i></div>
+          <div class="meter"><i id="meter-ii"></i></div>
+        </div>
+
+        <div style="margin-top:10px;color:var(--muted);font-size:13px">Shortcuts: ← → (navigate) · Enter (open) · Esc (back)</div>
+      </aside>
     </div>
   </div>
 
-  <script>
-    const display = document.getElementById("display");
-    const led = document.getElementById("led");
-    const playBtn = document.getElementById("play");
-    const stopBtn = document.getElementById("stop");
-    const nextBtn = document.getElementById("next");
-    const prevBtn = document.getElementById("prev");
+  <!-- boot overlay -->
+  <div class="boot" id="boot">
+    <p>INSERT TAPE — POLARBEAT</p>
+    <div class="progress"><div class="bar" id="boot-bar"></div></div>
+    <p style="font-size:12px; color:var(--muted)">calibrating neon sensors...</p>
+  </div>
 
-    const tapes = [
-      "🌀 PolarBeat — Neo-vectorheart concept fusing rhythm & altitude.",
-      "🪶 Loop — Upcycled kitesurf identity exploring motion & wind traces.",
-      "💀 Grunge Matchbox — 90s analog illustrations in symbolic form.",
-      "🌊 Zortibozuk — Visual experiments in abstract symbolism."
-    ];
-
-    let index = 0;
-    let playing = false;
-
-    function showMessage(text) {
-      display.innerHTML = `<p>${text}</p>`;
-      setTimeout(() => display.querySelector("p").classList.add("active"), 10);
+<script>
+  // DATA
+  const data = {
+    projects: {
+      title: "Projects",
+      subtitle: "select a project",
+      lines: [
+        "🌀 PolarBeat — neo-vectorheart apparel blending rhythm & altitude.",
+        "🪶 Loop — upcycled kitesurf brand identity inspired by motion loops.",
+        "💀 Grunge Matchbox — 90s symbolic matchbox series.",
+        "🌊 Zortibozuk — abstract visual experiments and prints."
+      ]
+    },
+    about: {
+      title: "About",
+      subtitle: "short bio",
+      lines: [
+        "Ibrahim Yavuzöz — graphic designer & kitesurf instructor.",
+        "Work focuses on symbolism, abstraction and rhythm.",
+        "Building under the name 'Zortibozuk'."
+      ]
+    },
+    contact: {
+      title: "Contact",
+      subtitle: "reach out",
+      lines: [
+        "Email: yourname@example.com",
+        "Instagram: @yourhandle",
+        "Available for freelance and collabs."
+      ]
     }
+  };
 
-    function playTape() {
-      playing = true;
-      led.classList.add("active");
-      showMessage(tapes[index]);
-    }
+  // STATE
+  const keys = ["projects","about","contact"];
+  let index = 0;
+  let open = false;
+  let current = "projects";
 
-    function stopTape() {
-      playing = false;
-      led.classList.remove("active");
-      showMessage("⏹ Tape stopped.");
-    }
+  // ELEMENTS
+  const boot = document.getElementById('boot');
+  const bar = document.getElementById('boot-bar');
+  const screenTitle = document.getElementById('screen-title');
+  const screenSub = document.getElementById('screen-sub');
+  const screenContent = document.getElementById('screen-content');
+  const statusChip = document.getElementById('status-chip');
+  const clockChip = document.getElementById('clock-chip');
+  const modeChip = document.getElementById('mode-chip');
+  const navButtons = Array.from(document.querySelectorAll('.nav button'));
+  const btnOpen = document.getElementById('btn-open');
+  const btnBack = document.getElementById('btn-back');
+  const meterI = document.getElementById('meter-i');
+  const meterII = document.getElementById('meter-ii');
 
-    function nextTape() {
-      index = (index + 1) % tapes.length;
-      if (playing) playTape();
-      else showMessage(`Ready: ${tapes[index]}`);
-    }
+  // BOOT sequence
+  function bootSequence(){
+    let val = 0;
+    const t = setInterval(()=> {
+      val += Math.random()*18 + 6;
+      if (val >= 100) { val = 100; clearInterval(t); finishBoot(); }
+      bar.style.width = val + '%';
+    }, 220);
+  }
+  function finishBoot(){
+    setTimeout(()=> {
+      boot.style.display = 'none';
+      renderSelection(); // show initial
+      tickMeters();
+      clockChip.textContent = 'LAST SAVE: ' + (new Date()).toLocaleString();
+    }, 600);
+  }
 
-    function prevTape() {
-      index = (index - 1 + tapes.length) % tapes.length;
-      if (playing) playTape();
-      else showMessage(`Ready: ${tapes[index]}`);
-    }
+  // RENDER
+  function renderSelection(){
+    // highlight
+    navButtons.forEach((b,i)=> b.classList.toggle('active', i===index));
+    current = keys[index];
+    const obj = data[current];
+    screenTitle.textContent = obj.title;
+    screenSub.textContent = obj.subtitle + ' • ' + ('0'+(index+1)).slice(-2);
+    // preview lines
+    const preview = obj.lines.slice(0,2).map(l => `<p>${l}</p>`).join('');
+    screenContent.innerHTML = preview + `<p class="small" style="margin-top:8px;color:var(--muted)">Press Enter to open • Esc to go back</p>`;
+    statusChip.textContent = 'STATUS: READY';
+    modeChip.textContent = 'MODE: EXPLORATION';
+    animateIn(screenContent);
+  }
 
-    playBtn.onclick = playTape;
-    stopBtn.onclick = stopTape;
-    nextBtn.onclick = nextTape;
-    prevBtn.onclick = prevTape;
+  function openCurrent(){
+    const obj = data[current];
+    screenTitle.textContent = obj.title;
+    screenSub.textContent = 'detail view';
+    screenContent.innerHTML = obj.lines.map(l => `<p>${l}</p>`).join('');
+    statusChip.textContent = 'STATUS: OPEN';
+    modeChip.textContent = 'MODE: VIEW';
+    open = true;
+    animateIn(screenContent);
+  }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") nextTape();
-      if (e.key === "ArrowLeft") prevTape();
-      if (e.key === " ") playTape();
-      if (e.key === "Escape") stopTape();
+  function goBack(){
+    if (!open){ statusChip.textContent = 'STATUS: IDLE'; return; }
+    open = false;
+    renderSelection();
+  }
+
+  // helper animate
+  function animateIn(el){
+    el.style.opacity = 0;
+    el.style.transform = 'translateY(8px) scale(0.995)';
+    requestAnimationFrame(()=> {
+      el.style.transition = 'all .36s cubic-bezier(.2,.9,.2,1)';
+      el.style.opacity = 1;
+      el.style.transform = 'translateY(0) scale(1)';
+      setTimeout(()=>{ el.style.transition = ''; },420);
     });
+  }
 
-    setTimeout(() => showMessage(`Ready: ${tapes[index]}`), 2500);
-  </script>
+  // meters
+  function tickMeters(){
+    function rnd() { return 30 + Math.floor(Math.random()*70); }
+    meterI.style.width = rnd() + '%';
+    meterII.style.width = rnd() + '%';
+    // animate inner bars
+    meterI.querySelector('i').style.width = (30 + Math.random()*60) + '%';
+    meterII.querySelector('i').style.width = (20 + Math.random()*70) + '%';
+    // loop
+    setTimeout(tickMeters, 2200 + Math.random()*2000);
+  }
+
+  // EVENTS
+  navButtons.forEach((b,i)=>{
+    b.addEventListener('click', ()=> {
+      index = i; renderSelection(); openCurrent(); // open immediately on click
+    });
+  });
+  btnOpen.addEventListener('click', ()=> {
+    if (!open) openCurrent(); else { /* could toggle */ }
+  });
+  btnBack.addEventListener('click', ()=> {
+    goBack();
+  });
+
+  // keyboard nav
+  window.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (!open){
+      if (k === 'ArrowRight' || k === 'ArrowDown'){
+        index = (index + 1) % keys.length; renderSelection();
+      } else if (k === 'ArrowLeft' || k === 'ArrowUp'){
+        index = (index - 1 + keys.length) % keys.length; renderSelection();
+      } else if (k === 'Enter'){
+        openCurrent();
+      } else if (k === '1' || k === '2' || k === '3'){
+        const num = parseInt(k,10) - 1;
+        if (num >=0 && num < keys.length){ index = num; renderSelection(); openCurrent(); }
+      }
+    } else {
+      if (k === 'Escape' || k.toLowerCase() === 'b'){
+        goBack();
+      }
+    }
+  });
+
+  // start
+  window.addEventListener('load', ()=> { bootSequence(); });
+
+  // small cosmetic: clicking nav already opened sets meter widths quickly
+  navButtons.forEach(btn => btn.addEventListener('click', ()=> {
+    meterI.querySelector('i').style.width = (40 + Math.random()*40) + '%';
+    meterII.querySelector('i').style.width = (25 + Math.random()*55) + '%';
+  }));
+</script>
 </body>
 </html>
