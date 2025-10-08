@@ -3,158 +3,122 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PolarBeat Interface — v2</title>
+<title>PolarBeat Interface — v2.1</title>
 <style>
   :root{
-    --bg-1: #071017;
-    --bg-2: #0b1116;
-    --hud: rgba(0,255,214,0.06);
-    --accent: #00ffd6;
-    --accent-dim: rgba(0,255,214,0.14);
-    --warm: #ffbf6b;
-    --panel: #0e1316;
-    --glass: rgba(255,255,255,0.03);
-    --muted: #8fbfb0;
+    --bg-1:#061016;
+    --bg-2:#05080b;
+    --accent:#00ffd6;
+    --accent-dim:rgba(0,255,214,0.12);
+    --warm:#ffbf6b;
+    --muted:#8fbfb0;
+    --glass:rgba(255,255,255,0.03);
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family: "Courier New", "IBM Plex Mono", monospace;background:
-    radial-gradient(1200px 600px at 10% 10%, #07121a 0%, transparent 10%),
-    linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 100%); color:var(--accent); -webkit-font-smoothing:antialiased;}
-  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+  html,body{height:100%;margin:0;font-family:"IBM Plex Mono","Share Tech Mono",monospace;color:var(--accent);-webkit-font-smoothing:antialiased;overflow:hidden}
+  /* background canvas sits behind everything */
+  #bgCanvas{position:fixed;inset:0;z-index:0;display:block}
 
-  /* shell */
+  /* main layout */
+  .wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
   .shell{
-    width:min(980px, 96%);
-    max-width:980px;
-    border-radius:14px;
-    padding:18px;
-    display:grid;
-    grid-template-columns: 1fr 320px;
-    gap:18px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.003));
-    border:1px solid rgba(0,255,214,0.06);
-    box-shadow: 0 30px 60px rgba(2,6,10,0.75), inset 0 1px 0 rgba(255,255,255,0.02);
+    width:min(980px,94%);max-width:980px;border-radius:14px;padding:18px;display:grid;grid-template-columns:1fr 320px;gap:18px;
+    background:linear-gradient(180deg, rgba(3,6,8,0.55), rgba(2,4,5,0.35));
+    border:1px solid rgba(255,255,255,0.02); box-shadow: 0 40px 90px rgba(0,0,0,0.7);
+    position:relative;overflow:hidden;
+    backdrop-filter: blur(4px) saturate(110%);
   }
 
-  /* left: HUD / display */
-  .hud{
-    padding:18px;
-    border-radius:10px;
-    background: linear-gradient(180deg, #071217, #061018);
-    min-height:360px;
-    position:relative;
-    overflow:hidden;
-    border:1px solid var(--hud);
-  }
-  .hud::before{
-    content:'';
-    position:absolute; inset:0; pointer-events:none;
+  /* subtle holographic overlay + scanlines */
+  .holo {
+    pointer-events:none;
+    position:absolute;inset:0;z-index:3;
     background:
-      linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 15%),
-      repeating-linear-gradient(180deg, rgba(255,255,255,0.002), rgba(255,255,255,0.002) 2px, transparent 2px, transparent 6px);
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.002), rgba(255,255,255,0.002) 2px, transparent 2px, transparent 6px),
+      linear-gradient(90deg, rgba(0,255,214,0.01), rgba(255,191,107,0.00) 20%, rgba(255,255,255,0.00) 80%);
     mix-blend-mode:overlay;
+    opacity:0.85;
   }
+  /* moving holographic sheen */
+  .holo::after{
+    content:""; position:absolute; left:-30%; top:-30%; width:60%; height:160%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.03), rgba(255,255,255,0.0) 40%, rgba(255,255,255,0.03) 100%);
+    transform: rotate(-12deg);
+    animation: sheen 8s linear infinite;
+    filter: blur(8px);
+    mix-blend-mode:screen;
+  }
+  @keyframes sheen{0%{transform:translateX(-100%) rotate(-12deg)}100%{transform:translateX(100%) rotate(-12deg)}}
 
-  .brand{
-    display:flex;align-items:center;gap:10px;margin-bottom:12px;
-  }
-  .badge{
-    width:56px;height:56px;border-radius:8px;background:linear-gradient(180deg,#021918,#072828);
-    display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,214,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.6);
-    font-weight:700;color:var(--accent);
-  }
+  /* HUD / left */
+  .hud{padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(3,14,12,0.88), rgba(0,8,8,0.92));min-height:360px;position:relative;border:1px solid rgba(0,255,214,0.04);z-index:1;overflow:hidden}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .badge{width:56px;height:56px;border-radius:8px;background:linear-gradient(180deg,#021918,#072828);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,214,0.06);font-weight:700;color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,0.6)}
   .brand h1{font-size:1.05rem;margin:0;color:var(--accent);letter-spacing:1.2px}
   .brand p{margin:0;font-size:12px;color:var(--muted)}
 
-  .screen{
-    margin-top:6px;
-    background: linear-gradient(180deg, rgba(3,14,12,0.98), rgba(0,6,6,0.98));
-    border-radius:8px;padding:18px;border:1px solid rgba(0,255,214,0.04);
-    min-height:220px; display:flex;flex-direction:column;gap:10px; justify-content:center;
-    box-shadow: inset 0 6px 40px rgba(0,0,0,0.7), 0 6px 30px rgba(0,0,0,0.6);
-  }
-
-  .title{
-    display:flex;align-items:center;gap:12px;
-  }
-  .title .tleft{font-size:13px;color:var(--accent);opacity:0.98}
-  .title .tright{font-size:11px;color:var(--muted);opacity:0.9}
-
-  .content{
-    font-size:14px;line-height:1.6;color:#cfffe9; opacity:0.98;
-    transform-origin:left center; transition: transform .36s cubic-bezier(.2,.9,.2,1), opacity .28s;
-  }
+  .screen{margin-top:6px;background:linear-gradient(180deg, rgba(3,14,12,0.98), rgba(0,6,6,0.98));border-radius:8px;padding:18px;border:1px solid rgba(0,255,214,0.02);min-height:220px;display:flex;flex-direction:column;gap:10px;justify-content:center;position:relative;overflow:hidden}
+  .screen .title{display:flex;align-items:center;gap:12px}
+  .tleft{font-size:13px;color:var(--accent);opacity:0.98}
+  .tright{font-size:11px;color:var(--muted);opacity:0.9}
+  .content{font-size:14px;line-height:1.6;color:#cfffe9;opacity:0.98;transform-origin:left center; transition: transform .36s cubic-bezier(.2,.9,.2,1), opacity .28s}
   .content.small{font-size:13px;color:#bfeee0}
-  .pulse{
-    display:inline-block; height:6px;width:6px;border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent);
-    margin-left:8px; opacity:0; transform:scale(.7); animation: breathe 2s infinite;
-  }
+  .pulse{display:inline-block;height:6px;width:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);margin-left:8px;opacity:0;transform:scale(.7);animation:breathe 2s infinite}
   @keyframes breathe{0%{opacity:.16;transform:scale(.8)}50%{opacity:1;transform:scale(1)}100%{opacity:.16;transform:scale(.8)}}
 
-  /* bottom tiny HUD lines */
+  /* tiny chips */
   .hud-lines{display:flex;gap:12px;margin-top:14px;font-size:12px;color:var(--muted);opacity:.9}
-  .chip{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.004)); padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.02); color:var(--muted)}
+  .chip{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.004));padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);color:var(--muted)}
 
-  /* right: menu / controls */
-  .panel{
-    padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.004));
-    border:1px solid rgba(255,255,255,0.02); display:flex;flex-direction:column; gap:12px;
-  }
+  /* right panel */
+  .panel{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.004));border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px;z-index:1}
   .nav{display:flex;flex-direction:column;gap:10px}
-  .nav button{
-    text-align:left;padding:12px;border-radius:8px;background:linear-gradient(180deg,#071216,#041014);
-    color:var(--accent);border:1px solid rgba(0,255,214,0.04); font-weight:700; cursor:pointer;
-    display:flex;justify-content:space-between; align-items:center; gap:8px; font-size:14px;
-    transition: transform .12s, box-shadow .12s, background .12s;
+  .nav button{text-align:left;padding:12px;border-radius:8px;background:linear-gradient(180deg,#071216,#041014);color:var(--accent);border:1px solid rgba(0,255,214,0.04);font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;transition:transform .12s,box-shadow .12s,background .12s}
+  .nav button:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+  .nav button.active{background:linear-gradient(180deg,#003c37,#002a25);color:white;box-shadow:0 20px 40px rgba(0,80,70,0.24);border:1px solid rgba(0,255,214,0.18)}
+  .hint{font-size:12px;color:var(--muted);opacity:.9}
+  .controls{display:flex;gap:8px;margin-top:6px}
+  .control{flex:1;padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);text-align:center;color:var(--muted);font-weight:700;cursor:pointer}
+  .control:active{transform:translateY(2px)}
+  .meters{display:flex;gap:10px;margin-top:8px;align-items:center}
+  .meter{flex:1;height:6px;border-radius:6px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.006));overflow:hidden}
+  .meter>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--warm));box-shadow:0 6px 24px rgba(0,255,214,0.06), inset 0 -6px 20px rgba(255,191,107,0.04);transition:width .8s ease}
+
+  .foot{font-size:12px;color:var(--muted);margin-top:12px;opacity:.95}
+
+  /* scrolling code reflection */
+  .reflect{
+    position:absolute;left:10%;right:10%;top:55%;height:70%;opacity:0.06;z-index:1;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+    mask-image: linear-gradient(180deg, rgba(0,0,0,1), rgba(0,0,0,0.2), rgba(0,0,0,1));
+    pointer-events:none;font-family: "Courier New", monospace;font-size:12px;color:#bfffe0;overflow:hidden;
+    transform: translateY(0); will-change:transform;
   }
-  .nav button:hover{ transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.6)}
-  .nav button.active{ background: linear-gradient(180deg,#003c37,#002a25); color:white; box-shadow:0 20px 40px rgba(0,80,70,0.24); border:1px solid rgba(0,255,214,0.18) }
+  .reflect pre{margin:0;padding:8px 14px;white-space:pre;opacity:0.95}
 
-  .nav .hint{ font-size:12px; color:var(--muted); opacity:.9 }
+  /* breathing glow on active elements */
+  .glow{box-shadow:0 0 24px rgba(0,255,214,0.12), 0 0 80px rgba(0,255,214,0.04);transition:box-shadow .45s ease}
+  .glow.pulse{animation:glowPulse 3s ease-in-out infinite}
+  @keyframes glowPulse{0%{box-shadow:0 0 10px rgba(0,255,214,0.06)}50%{box-shadow:0 0 34px rgba(0,255,214,0.18)}100%{box-shadow:0 0 10px rgba(0,255,214,0.06)}}
 
-  .controls{display:flex;gap:8px; margin-top:6px}
-  .control{
-    flex:1; padding:10px;border-radius:8px;background:var(--panel); border:1px solid rgba(255,255,255,0.02);
-    text-align:center;color:var(--muted); font-weight:700; cursor:pointer;
-  }
-  .control:active{ transform:translateY(2px) }
-
-  .meters{display:flex;gap:10px; margin-top:8px; align-items:center}
-  .meter{flex:1;height:6px;border-radius:6px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.006)); overflow:hidden}
-  .meter > i{display:block;height:100%; width:0%; background: linear-gradient(90deg,var(--accent),var(--warm)); box-shadow:0 6px 24px rgba(0,255,214,0.06), inset 0 -6px 20px rgba(255,191,107,0.04); transition: width .8s ease}
-
-  /* small foot */
-  .foot{font-size:12px;color:var(--muted); margin-top:12px; opacity:.95}
-
-  /* subtle intro animation */
-  .boot {
-    position:absolute; inset:0; display:flex;align-items:center;justify-content:center; background:linear-gradient(180deg, rgba(2,8,8,0.5), rgba(0,0,0,0.6));
-    z-index:6; color:var(--accent); font-size:13px; flex-direction:column; gap:8px;
-    backdrop-filter: blur(2px);
-  }
-  .boot p{ margin:0; opacity:.95; letter-spacing:0.6px }
-  .progress{ width:260px; height:8px; border-radius:999px; background:rgba(255,255,255,0.03); overflow:hidden; border:1px solid rgba(255,255,255,0.02) }
-  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--warm)); box-shadow:0 6px 30px rgba(0,255,214,0.06); transition: width 1s linear }
-
-  /* responsiveness */
-  @media (max-width:920px){
-    .shell{grid-template-columns:1fr; padding:12px}
-    .nav{flex-direction:row; overflow:auto}
-    .nav button{min-width:140px; flex:1 0 auto}
-    .panel{order:2}
-    .hud{order:1}
-  }
+  /* responsive */
+  @media(max-width:920px){.shell{grid-template-columns:1fr;padding:12px}.nav{flex-direction:row;overflow:auto}.nav button{min-width:140px;flex:1 0 auto}.panel{order:2}.hud{order:1}.reflect{display:none}}
 </style>
 </head>
 <body>
+  <!-- starfield canvas -->
+  <canvas id="bgCanvas"></canvas>
+
   <div class="wrap">
     <div class="shell" role="application" aria-label="PolarBeat Interface">
+      <div class="holo" aria-hidden="true"></div>
+
       <div class="hud" id="hud">
         <div class="brand">
-          <div class="badge">Z</div>
+          <div class="badge">PB</div>
           <div>
-            <h1>PORTFOLIO INTERFACE</h1>
-            <p>v2 — analog-digital hybrid UI</p>
+            <h1>POLARBEAT INTERFACE</h1>
+            <p>v2.1 — analog-digital hybrid</p>
           </div>
         </div>
 
@@ -162,6 +126,7 @@
           <div class="title">
             <div class="tleft" id="screen-title">Welcome</div>
             <div class="tright" id="screen-sub">system idle</div>
+            <div class="pulse" id="heartbeat" title="system heartbeat"></div>
           </div>
           <div class="content" id="screen-content">
             <p>Booting interface…</p>
@@ -175,7 +140,10 @@
           <div class="chip" id="mode-chip">MODE: EXPLORATION</div>
         </div>
 
-        <div class="foot"> • Portfolio prototype</div>
+        <div class="foot">Designed for Zortibozuk • Living interface</div>
+
+        <!-- subtle reflection text -->
+        <div class="reflect" id="reflect"><pre id="reflectText"></pre></div>
       </div>
 
       <aside class="panel" aria-label="menu panel">
@@ -195,189 +163,281 @@
           <div class="meter"><i id="meter-ii"></i></div>
         </div>
 
-        <div style="margin-top:10px;color:var(--muted);font-size:13px">Shortcuts: ← → (navigate) · Enter (open) · Esc (back)</div>
+        <div style="margin-top:10px;color:var(--muted);font-size:13px">Shortcuts: ← → · Enter · Esc</div>
       </aside>
     </div>
   </div>
 
-  <!-- boot overlay -->
-  <div class="boot" id="boot">
-    <p>INSERT TAPE — portfolio</p>
-    <div class="progress"><div class="bar" id="boot-bar"></div></div>
-    <p style="font-size:12px; color:var(--muted)">calibrating neon sensors...</p>
-  </div>
-
 <script>
-  // DATA
-  const data = {
-    projects: {
-      title: "Projects",
-      subtitle: "select a project",
-      lines: [
-        "🌀 PolarBeat — neo-vectorheart apparel blending rhythm & altitude.",
-        "🪶 Loop — upcycled kitesurf brand identity inspired by motion loops.",
-        "💀 Grunge Matchbox — 90s symbolic matchbox series.",
-        "🌊 Zortibozuk — abstract visual experiments and prints."
-      ]
-    },
-    about: {
-      title: "About",
-      subtitle: "short bio",
-      lines: [
-        "Ibrahim Yavuzöz — graphic designer & kitesurf instructor.",
-        "Work focuses on symbolism, abstraction and rhythm.",
-        "Building under the name 'Zortibozuk'."
-      ]
-    },
-    contact: {
-      title: "Contact",
-      subtitle: "reach out",
-      lines: [
-        "Email: ibrahimyavuzoz@gmail.com",
-        "Instagram: @bo2uk @zortibozuk",
-        "Available for freelance and collabs."
-      ]
-    }
-  };
+/* ---------------------------
+   Starfield background (canvas)
+   --------------------------- */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth;
+let H = canvas.height = innerHeight;
+window.addEventListener('resize', ()=>{W=canvas.width=innerWidth; H=canvas.height=innerHeight; initStars()});
 
-  // STATE
-  const keys = ["projects","about","contact"];
-  let index = 0;
-  let open = false;
-  let current = "projects";
-
-  // ELEMENTS
-  const boot = document.getElementById('boot');
-  const bar = document.getElementById('boot-bar');
-  const screenTitle = document.getElementById('screen-title');
-  const screenSub = document.getElementById('screen-sub');
-  const screenContent = document.getElementById('screen-content');
-  const statusChip = document.getElementById('status-chip');
-  const clockChip = document.getElementById('clock-chip');
-  const modeChip = document.getElementById('mode-chip');
-  const navButtons = Array.from(document.querySelectorAll('.nav button'));
-  const btnOpen = document.getElementById('btn-open');
-  const btnBack = document.getElementById('btn-back');
-  const meterI = document.getElementById('meter-i');
-  const meterII = document.getElementById('meter-ii');
-
-  // BOOT sequence
-  function bootSequence(){
-    let val = 0;
-    const t = setInterval(()=> {
-      val += Math.random()*18 + 6;
-      if (val >= 100) { val = 100; clearInterval(t); finishBoot(); }
-      bar.style.width = val + '%';
-    }, 220);
-  }
-  function finishBoot(){
-    setTimeout(()=> {
-      boot.style.display = 'none';
-      renderSelection(); // show initial
-      tickMeters();
-      clockChip.textContent = 'LAST SAVE: ' + (new Date()).toLocaleString();
-    }, 600);
-  }
-
-  // RENDER
-  function renderSelection(){
-    // highlight
-    navButtons.forEach((b,i)=> b.classList.toggle('active', i===index));
-    current = keys[index];
-    const obj = data[current];
-    screenTitle.textContent = obj.title;
-    screenSub.textContent = obj.subtitle + ' • ' + ('0'+(index+1)).slice(-2);
-    // preview lines
-    const preview = obj.lines.slice(0,2).map(l => `<p>${l}</p>`).join('');
-    screenContent.innerHTML = preview + `<p class="small" style="margin-top:8px;color:var(--muted)">Press Enter to open • Esc to go back</p>`;
-    statusChip.textContent = 'STATUS: READY';
-    modeChip.textContent = 'MODE: EXPLORATION';
-    animateIn(screenContent);
-  }
-
-  function openCurrent(){
-    const obj = data[current];
-    screenTitle.textContent = obj.title;
-    screenSub.textContent = 'detail view';
-    screenContent.innerHTML = obj.lines.map(l => `<p>${l}</p>`).join('');
-    statusChip.textContent = 'STATUS: OPEN';
-    modeChip.textContent = 'MODE: VIEW';
-    open = true;
-    animateIn(screenContent);
-  }
-
-  function goBack(){
-    if (!open){ statusChip.textContent = 'STATUS: IDLE'; return; }
-    open = false;
-    renderSelection();
-  }
-
-  // helper animate
-  function animateIn(el){
-    el.style.opacity = 0;
-    el.style.transform = 'translateY(8px) scale(0.995)';
-    requestAnimationFrame(()=> {
-      el.style.transition = 'all .36s cubic-bezier(.2,.9,.2,1)';
-      el.style.opacity = 1;
-      el.style.transform = 'translateY(0) scale(1)';
-      setTimeout(()=>{ el.style.transition = ''; },420);
+let stars = [];
+function initStars(){
+  stars = [];
+  const count = Math.floor((W*H)/40000); // density
+  for(let i=0;i<count;i++){
+    stars.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      z: 0.2 + Math.random()*0.8,
+      r: Math.random()*1.6,
+      vx: (Math.random()-0.5)*0.02,
+      vy: (Math.random()-0.5)*0.02
     });
   }
+}
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  // subtle nebula gradient
+  const g = ctx.createRadialGradient(W*0.2, H*0.1, 0, W*0.2, H*0.1, Math.max(W,H));
+  g.addColorStop(0, 'rgba(0,40,40,0.06)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
 
-  // meters
-  function tickMeters(){
-    function rnd() { return 30 + Math.floor(Math.random()*70); }
-    meterI.style.width = rnd() + '%';
-    meterII.style.width = rnd() + '%';
-    // animate inner bars
-    meterI.querySelector('i').style.width = (30 + Math.random()*60) + '%';
-    meterII.querySelector('i').style.width = (20 + Math.random()*70) + '%';
-    // loop
-    setTimeout(tickMeters, 2200 + Math.random()*2000);
+  for(const s of stars){
+    s.x += s.vx * (s.z*0.6+0.4);
+    s.y += s.vy * (s.z*0.6+0.4);
+    if(s.x<0) s.x = W;
+    if(s.x>W) s.x = 0;
+    if(s.y<0) s.y = H;
+    if(s.y>H) s.y = 0;
+    const alpha = 0.2 + s.z*0.8;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(180,255,220,${alpha})`;
+    ctx.arc(s.x, s.y, s.r * s.z, 0, Math.PI*2);
+    ctx.fill();
   }
+  // subtle drifting small particles
+  requestAnimationFrame(drawStars);
+}
+initStars();
+drawStars();
 
-  // EVENTS
-  navButtons.forEach((b,i)=>{
-    b.addEventListener('click', ()=> {
-      index = i; renderSelection(); openCurrent(); // open immediately on click
-    });
-  });
-  btnOpen.addEventListener('click', ()=> {
-    if (!open) openCurrent(); else { /* could toggle */ }
-  });
-  btnBack.addEventListener('click', ()=> {
-    goBack();
-  });
+/* ---------------------------
+   Data + UI state + helpers
+   --------------------------- */
+const data = {
+  projects:{
+    title:"Projects",
+    subtitle:"select a project",
+    lines:[
+      "🌀 PolarBeat — neo-vectorheart apparel blending rhythm & altitude.",
+      "🪶 Loop — Upcycled kitesurf identity inspired by motion loops.",
+      "💀 Grunge Matchbox — 90s symbolic matchbox series.",
+      "🌊 Zortibozuk — abstract visual experiments and prints."
+    ]
+  },
+  about:{
+    title:"About",
+    subtitle:"short bio",
+    lines:[
+      "Ibrahim Yavuzöz — graphic designer & kitesurf instructor.",
+      "Work focuses on symbolism, abstraction and rhythm.",
+      "Building under the name 'Zortibozuk'."
+    ]
+  },
+  contact:{
+    title:"Contact",
+    subtitle:"reach out",
+    lines:[
+      "Email: yourname@example.com",
+      "Instagram: @yourhandle",
+      "Available for freelance and collabs."
+    ]
+  }
+};
+const keys = ["projects","about","contact"];
+let index = 0;
+let isOpen = false;
+let current = keys[index];
 
-  // keyboard nav
-  window.addEventListener('keydown', (e) => {
-    const k = e.key;
-    if (!open){
-      if (k === 'ArrowRight' || k === 'ArrowDown'){
-        index = (index + 1) % keys.length; renderSelection();
-      } else if (k === 'ArrowLeft' || k === 'ArrowUp'){
-        index = (index - 1 + keys.length) % keys.length; renderSelection();
-      } else if (k === 'Enter'){
-        openCurrent();
-      } else if (k === '1' || k === '2' || k === '3'){
-        const num = parseInt(k,10) - 1;
-        if (num >=0 && num < keys.length){ index = num; renderSelection(); openCurrent(); }
-      }
-    } else {
-      if (k === 'Escape' || k.toLowerCase() === 'b'){
-        goBack();
-      }
-    }
+/* elements */
+const navButtons = Array.from(document.querySelectorAll('.nav button'));
+const screenTitle = document.getElementById('screen-title');
+const screenSub = document.getElementById('screen-sub');
+const screenContent = document.getElementById('screen-content');
+const statusChip = document.getElementById('status-chip');
+const modeChip = document.getElementById('mode-chip');
+const clockChip = document.getElementById('clock-chip');
+const btnOpen = document.getElementById('btn-open');
+const btnBack = document.getElementById('btn-back');
+const meterI = document.getElementById('meter-i');
+const meterII = document.getElementById('meter-ii');
+const heartbeat = document.getElementById('heartbeat');
+const reflectText = document.getElementById('reflectText');
+const reflect = document.getElementById('reflect');
+
+/* initial */
+function renderSelection(){
+  navButtons.forEach((b,i)=> b.classList.toggle('active', i===index));
+  current = keys[index];
+  const obj = data[current];
+  screenTitle.textContent = obj.title;
+  screenSub.textContent = obj.subtitle + ' • ' + ('0'+(index+1)).slice(-2);
+  screenContent.innerHTML = obj.lines.slice(0,2).map(l => `<p>${l}</p>`).join('') +
+    `<p class="small" style="margin-top:8px;color:var(--muted)">Press Enter to open • Esc to go back</p>`;
+  statusChip.textContent = 'STATUS: READY';
+  modeChip.textContent = 'MODE: EXPLORATION';
+  animateIn(screenContent);
+  playClick(120,0.02);
+}
+function openCurrent(){
+  const obj = data[current];
+  screenTitle.textContent = obj.title;
+  screenSub.textContent = 'detail view';
+  screenContent.innerHTML = obj.lines.map(l => `<p>${l}</p>`).join('');
+  statusChip.textContent = 'STATUS: OPEN';
+  modeChip.textContent = 'MODE: VIEW';
+  isOpen = true;
+  animateIn(screenContent);
+  playClick(180,0.04);
+}
+function goBack(){
+  if(!isOpen){ statusChip.textContent='STATUS: IDLE'; playClick(80,0.02); return; }
+  isOpen=false; renderSelection();
+}
+
+/* animate */
+function animateIn(el){
+  el.style.opacity = 0; el.style.transform='translateY(8px) scale(.995)';
+  requestAnimationFrame(()=> {
+    el.style.transition='all .36s cubic-bezier(.2,.9,.2,1)';
+    el.style.opacity=1; el.style.transform='translateY(0) scale(1)';
+    setTimeout(()=> el.style.transition='',420);
   });
+}
 
-  // start
-  window.addEventListener('load', ()=> { bootSequence(); });
+/* meters */
+function tickMeters(){
+  function rnd(){ return 30 + Math.floor(Math.random()*70); }
+  meterI.style.width = rnd() + '%';
+  meterII.style.width = rnd() + '%';
+  meterI.querySelector('i').style.width = (30 + Math.random()*60) + '%';
+  meterII.querySelector('i').style.width = (20 + Math.random()*70) + '%';
+  setTimeout(tickMeters, 2200 + Math.random()*2000);
+}
 
-  // small cosmetic: clicking nav already opened sets meter widths quickly
-  navButtons.forEach(btn => btn.addEventListener('click', ()=> {
-    meterI.querySelector('i').style.width = (40 + Math.random()*40) + '%';
-    meterII.querySelector('i').style.width = (25 + Math.random()*55) + '%';
-  }));
+/* reflection code scroller */
+const sampleLines = [
+  "init.polarbeat()",
+  "load: assets/neo-vectorheart.svg",
+  "calibrate.neonSensors()",
+  "rt.display.setMode('explore')",
+  "sync.rhythm(120bpm)",
+  "canvas.render('polar', true)",
+  ">> listening to wind",
+  "watch(loops).map(trace => draw(trace))"
+];
+function updateReflect(){
+  // create a long scrolling block
+  const block = Array(30).fill(0).map((_,i)=> sampleLines[(i+index)%sampleLines.length]).join("\n");
+  reflectText.textContent = block;
+  // animate slight vertical scroll
+  let t = 0;
+  function anim(){
+    t += 0.3;
+    reflect.style.transform = `translateY(${t}px)`;
+    if(t>18) { reflect.style.transform = 'translateY(0)'; t=0; }
+    requestAnimationFrame(anim);
+  }
+  anim();
+}
+
+/* nav events */
+navButtons.forEach((b,i)=>{
+  b.addEventListener('click', ()=> { index=i; renderSelection(); openCurrent(); updateReflect(); });
+});
+btnOpen.addEventListener('click', ()=> { if(!isOpen) openCurrent(); });
+btnBack.addEventListener('click', ()=> { goBack(); });
+
+/* keyboard nav */
+window.addEventListener('keydown', (e)=>{
+  const k=e.key;
+  if(!isOpen){
+    if(k==='ArrowRight' || k==='ArrowDown'){ index=(index+1)%keys.length; renderSelection(); updateReflect(); }
+    else if(k==='ArrowLeft' || k==='ArrowUp'){ index=(index-1+keys.length)%keys.length; renderSelection(); updateReflect(); }
+    else if(k==='Enter'){ openCurrent(); }
+    else if(k==='1'||k==='2'||k==='3'){ const n=parseInt(k,10)-1; if(n>=0 && n<keys.length){ index=n; renderSelection(); openCurrent(); updateReflect(); } }
+  } else {
+    if(k==='Escape' || k.toLowerCase()==='b'){ goBack(); }
+  }
+});
+
+/* heartbeat pulse subtle glow */
+function heartbeatTick(){
+  heartbeat.classList.add('glow','pulse');
+  setTimeout(()=> heartbeat.classList.remove('pulse'), 900);
+  setTimeout(heartbeatTick, 2400 + Math.random()*1600);
+}
+
+/* boot simulation */
+function bootSequence(){
+  const bootOverlay = document.createElement('div');
+  bootOverlay.style.position='absolute';
+  bootOverlay.style.inset='0';
+  bootOverlay.style.zIndex='6';
+  bootOverlay.style.display='flex';
+  bootOverlay.style.alignItems='center';
+  bootOverlay.style.justifyContent='center';
+  bootOverlay.style.flexDirection='column';
+  bootOverlay.style.backdropFilter='blur(4px)';
+  bootOverlay.style.background='linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3))';
+  bootOverlay.innerHTML = `<div style="color:var(--accent);font-family:inherit;text-align:center">
+    <div style="font-weight:700;margin-bottom:10px">INSERT TAPE — POLARBEAT</div>
+    <div style="width:260px;height:8px;border-radius:999px;background:rgba(255,255,255,0.03);overflow:hidden;border:1px solid rgba(255,255,255,0.02)">
+      <div id="virtualBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--warm));box-shadow:0 6px 30px rgba(0,255,214,0.06)"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">calibrating neon sensors...</div></div>`;
+  document.querySelector('.shell').appendChild(bootOverlay);
+  const bar = document.getElementById('virtualBar');
+  let v = 0;
+  const t = setInterval(()=> { v += Math.random()*14 + 6; bar.style.width = Math.min(100,v)+'%'; if(v>=100){ clearInterval(t); setTimeout(()=> bootOverlay.remove(), 520); renderSelection(); tickMeters(); heartbeatTick(); updateReflect(); clockChip.textContent = 'LAST SAVE: ' + (new Date()).toLocaleString(); } }, 240);
+}
+
+/* ---------------------------
+   WebAudio synth click
+   --------------------------- */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+function playClick(freq=150, gain=0.03){
+  try{
+    ensureAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(gain, now+0.001);
+    o.start(now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+0.12);
+    o.stop(now+0.16);
+  }catch(e){/* audio blocked */ }
+}
+
+/* start everything */
+window.addEventListener('load', ()=> { bootSequence(); });
+
+/* animate and small loops */
+tickMeters();
+
+/* safety: resume audio on user gesture */
+['click','touchstart','keydown'].forEach(ev => window.addEventListener(ev, () => { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, {once:false}));
+
 </script>
 </body>
 </html>
