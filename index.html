@@ -1,344 +1,189 @@
-<!doctype html>
-<html lang="tr">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ibrahim Yavuzöz — Portfolio (Modern Retro)</title>
-<style>
-  :root{
-    --bg:#0b0b0b;
-    --metal1:#2b2f33;
-    --metal2:#6b6f73;
-    --accent:#1bd1a6;
-    --lcd-bg:#04120a;
-    --lcd-text:#c7ffd9;
-    --glass: rgba(255,255,255,0.04);
-    --btn-dark: #111;
-  }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#050505 0%, #0d0d0d 100%);font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;color:var(--lcd-text);-webkit-font-smoothing:antialiased;}
-  .page {
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:28px;
-    box-sizing:border-box;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PolarBeat Console</title>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      font-family: "Share Tech Mono", monospace;
+      color: #99ffee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+    }
 
-  /* Player shell */
-  .player {
-    width:min(960px, 96%);
-    background: linear-gradient(180deg, #1c1f22 0%, #121315 100%);
-    border-radius:14px;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
-    display:grid;
-    grid-template-columns: 1fr 260px;
-    gap:18px;
-    padding:18px;
-    align-items:start;
-    border:1px solid rgba(255,255,255,0.03);
-  }
+    .console {
+      background: #0a0a0a;
+      border: 2px solid #00ffbf33;
+      box-shadow: 0 0 30px #00ffbf22;
+      border-radius: 12px;
+      padding: 30px 40px;
+      width: 600px;
+      max-width: 90%;
+      text-align: center;
+    }
 
-  /* left area: display + controls */
-  .left {
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  .display {
-    background: linear-gradient(180deg, rgba(20,24,26,0.9), rgba(8,10,12,0.95));
-    border-radius:8px;
-    padding:18px;
-    min-height:220px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.02);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-  }
-  .lcd {
-    background: linear-gradient(180deg, rgba(4,22,12,0.95), rgba(1,8,6,0.95));
-    border-radius:6px;
-    padding:12px 14px;
-    color:var(--lcd-text);
-    font-family: "Courier New", monospace;
-    font-size:14px;
-    line-height:1.45;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    position:relative;
-    overflow:hidden;
-  }
-  /* LCD flicker */
-  .lcd::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background:linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.00) 50%, rgba(255,255,255,0.02) 100%);
-    mix-blend-mode:overlay;
-    opacity:0.6;
-    animation: flicker 6s linear infinite;
-  }
-  @keyframes flicker {
-    0%{opacity:.06} 2%{opacity:.22}
-    6%{opacity:.08} 8%{opacity:.18}
-    12%{opacity:.06} 100%{opacity:.06}
-  }
+    .title {
+      font-size: 1.2em;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      color: #00ffbf;
+      text-shadow: 0 0 10px #00ffbf77;
+    }
 
-  .lcd h3 { margin:0 0 6px 0; font-size:15px; color:var(--accent); letter-spacing:0.6px; }
-  .lcd p { margin:0; color: #bfeed6; opacity:0.95; font-size:13px; }
+    .display {
+      background: #030303;
+      border: 1px solid #00ffbf55;
+      height: 160px;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px #00ffbf11;
+    }
 
-  .controls {
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-  .control-btn {
-    width:56px;height:56px;border-radius:8px;
-    background: linear-gradient(180deg,#151617,#0b0b0b);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    border:1px solid rgba(255,255,255,0.03);
-    color:var(--lcd-text);
-    font-weight:700;
-    cursor:pointer;
-    user-select:none;
-    transition:transform .12s ease, box-shadow .12s;
-  }
-  .control-btn:active { transform: translateY(2px) scale(.995); box-shadow: 0 4px 8px rgba(0,0,0,0.6); }
-  .control-btn[aria-pressed="true"]{ background:linear-gradient(180deg,#0f4b39,#08382b); color:white; box-shadow:0 8px 18px rgba(0,0,0,0.7); }
+    .display p {
+      margin: 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
 
-  /* right area: menu */
-  .menu {
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    padding:6px;
-  }
-  .menu .btn {
-    background:linear-gradient(180deg, #0f1112, #0a0a0a);
-    border-radius:10px;
-    padding:14px 12px;
-    text-align:left;
-    font-weight:700;
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
-    cursor:pointer;
-    color:var(--lcd-text);
-    transition: transform .12s ease, background .12s;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .menu .btn:active{ transform: translateY(2px); }
-  .menu .btn .label{ font-size:14px; }
-  .menu .btn .hint{ opacity:0.6; font-size:12px; color:#9fdfc5; }
+    .display p.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-  .menu .btn.active {
-    background: linear-gradient(180deg,#0e5a44,#073b2e);
-    color:white;
-    box-shadow: 0 16px 36px rgba(5,25,15,0.6);
-  }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
 
-  /* footer / small text */
-  .meta {
-    margin-top:8px;
-    font-size:12px;
-    color: #8fbfaa;
-    opacity:0.8;
-  }
+    .btn {
+      background: #050505;
+      border: 1px solid #00ffbf55;
+      color: #99ffee;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 8px #00ffbf22;
+    }
 
-  /* responsive */
-  @media (max-width:820px){
-    .player{ grid-template-columns: 1fr; padding:12px; }
-    .menu{ order:2; flex-direction:row; gap:8px; overflow:auto; }
-    .menu .btn{ min-width:120px; flex:1 0 auto; }
-    .left{ order:1; }
-    .display{ min-height:180px; }
-    .control-btn{ width:48px;height:48px; }
-  }
-</style>
+    .btn:hover {
+      background: #00ffbf22;
+      box-shadow: 0 0 12px #00ffbf55;
+    }
+
+    .led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #003300;
+      margin: 10px auto;
+      box-shadow: 0 0 5px #003300;
+    }
+
+    .led.active {
+      background: #00ff88;
+      box-shadow: 0 0 15px #00ff88aa;
+    }
+
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.4; }
+    }
+
+    .startup {
+      animation: flicker 2s infinite;
+      font-size: 0.9em;
+      color: #00ffbf77;
+    }
+  </style>
 </head>
 <body>
-  <div class="page">
-    <main class="player" role="application" aria-label="portfolio player">
-      <section class="left" aria-live="polite">
-        <div class="display" id="display">
-          <div class="lcd" id="lcd">
-            <h3 id="lcd-title">Welcome</h3>
-            <div id="lcd-body">
-              <p id="line1">Hello — I'm Ibrahim Yavuzöz, graphic designer & kitesurf instructor.</p>
-              <p id="line2" style="margin-top:8px;opacity:0.85">Use ← / → to pick, Enter to open. Or tap the buttons on the right.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="controls" role="group" aria-label="navigation controls">
-          <button class="control-btn" id="prevBtn" title="Previous (←)">
-            ◀
-          </button>
-          <button class="control-btn" id="openBtn" title="Open (Enter / Space)" aria-pressed="false">
-            ▶
-          </button>
-          <button class="control-btn" id="nextBtn" title="Next (→)">
-            ▶▶
-          </button>
-        </div>
-
-        <div class="meta" id="meta">Modern-retro UI • Arrow keys / touch / click • Esc or B to go back</div>
-      </section>
-
-      <aside class="menu" role="navigation" aria-label="main menu">
-        <button class="btn active" data-key="projects" id="btn-projects"><span class="label">Projects</span><span class="hint">01</span></button>
-        <button class="btn" data-key="about" id="btn-about"><span class="label">About</span><span class="hint">02</span></button>
-        <button class="btn" data-key="contact" id="btn-contact"><span class="label">Contact</span><span class="hint">03</span></button>
-      </aside>
-    </main>
+  <div class="console">
+    <div class="title">POLARBEAT CONSOLE v1.0</div>
+    <div class="display" id="display">
+      <p class="startup">Insert tape... Loading PolarBeat...</p>
+    </div>
+    <div class="led" id="led"></div>
+    <div class="buttons">
+      <button class="btn" id="prev">⏮</button>
+      <button class="btn" id="play">▶</button>
+      <button class="btn" id="stop">⏹</button>
+      <button class="btn" id="next">⏭</button>
+    </div>
   </div>
 
-<script>
-  // content (keeps your original text)
-  const sections = {
-    main: {
-      title: "Welcome",
-      lines: [
-        "Hello — I'm Ibrahim Yavuzöz, graphic designer & kitesurf instructor.",
-        "My work explores symbolism, abstraction, and rhythmic visuals.",
-        "Use ← / → to pick, Enter to open. Tap a menu button to instantly open."
-      ]
-    },
-    projects: {
-      title: "Projects",
-      lines: [
-        "🌀 PolarBeat — neo-vectorheart apparel mixing rhythm & altitude.",
-        "🪶 Loop — upcycled kitesurf brand identity inspired by motion.",
-        "💀 Grunge Matchbox — 90s symbolic matchbox series."
-      ]
-    },
-    about: {
-      title: "About",
-      lines: [
-        "Multidisciplinary designer and kitesurf instructor.",
-        "I explore symbolism, abstraction and rhythm in visuals & movement.",
-        "Working under the name 'Zortibozuk'."
-      ]
-    },
-    contact: {
-      title: "Contact",
-      lines: [
-        "📧 Email: yourname@example.com",
-        "📸 Instagram: @yourhandle",
-        "Available for freelance projects and collaborations."
-      ]
+  <script>
+    const display = document.getElementById("display");
+    const led = document.getElementById("led");
+    const playBtn = document.getElementById("play");
+    const stopBtn = document.getElementById("stop");
+    const nextBtn = document.getElementById("next");
+    const prevBtn = document.getElementById("prev");
+
+    const tapes = [
+      "🌀 PolarBeat — Neo-vectorheart concept fusing rhythm & altitude.",
+      "🪶 Loop — Upcycled kitesurf identity exploring motion & wind traces.",
+      "💀 Grunge Matchbox — 90s analog illustrations in symbolic form.",
+      "🌊 Zortibozuk — Visual experiments in abstract symbolism."
+    ];
+
+    let index = 0;
+    let playing = false;
+
+    function showMessage(text) {
+      display.innerHTML = `<p>${text}</p>`;
+      setTimeout(() => display.querySelector("p").classList.add("active"), 10);
     }
-  };
 
-  // state
-  const menuKeys = ["projects","about","contact"];
-  let currentIndex = 0;
-  let currentSection = "main";
-
-  // elements
-  const lcdTitle = document.getElementById('lcd-title');
-  const lcdBody = document.getElementById('lcd-body');
-  const meta = document.getElementById('meta');
-  const menuButtons = menuKeys.map(k => document.querySelector(`[data-key="${k}"]`));
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const openBtn = document.getElementById('openBtn');
-
-  // helpers
-  function renderMainSelection(){
-    // highlight selected button
-    menuButtons.forEach((btn, i) => {
-      btn.classList.toggle('active', i === currentIndex);
-    });
-    // update lcd with a preview (short)
-    const key = menuKeys[currentIndex];
-    const s = sections[key];
-    lcdTitle.textContent = s.title;
-    lcdBody.innerHTML = `<p>${s.lines[0]}</p><p style="margin-top:8px;opacity:.9">${s.lines[1] || ""}</p>`;
-  }
-
-  function openSection(key){
-    currentSection = key;
-    const s = sections[key] || sections.main;
-    lcdTitle.textContent = s.title;
-    lcdBody.innerHTML = s.lines.map(l => `<p>${l}</p>`).join('');
-    // set play button to pressed state briefly as feedback
-    openBtn.setAttribute('aria-pressed','true');
-    setTimeout(()=> openBtn.setAttribute('aria-pressed','false'), 220);
-    meta.textContent = (key === 'projects' || key==='about' || key==='contact') ? "Press Esc or B to go back" : "Modern-retro UI";
-  }
-
-  function goBack(){
-    currentSection = 'main';
-    lcdTitle.textContent = sections.main.title;
-    lcdBody.innerHTML = sections.main.lines.map(l => `<p>${l}</p>`).join('');
-    meta.textContent = "Modern-retro UI • Arrow keys / touch / click • Esc or B to go back";
-    // restore menu highlight
-    menuButtons.forEach((btn,i)=> btn.classList.toggle('active', i===currentIndex));
-  }
-
-  // initial render
-  goBack();
-  renderMainSelection();
-
-  // button events
-  prevBtn.addEventListener('click', ()=> {
-    if (currentSection !== 'main') return;
-    currentIndex = (currentIndex - 1 + menuKeys.length) % menuKeys.length;
-    renderMainSelection();
-  });
-  nextBtn.addEventListener('click', ()=> {
-    if (currentSection !== 'main') return;
-    currentIndex = (currentIndex + 1) % menuKeys.length;
-    renderMainSelection();
-  });
-  openBtn.addEventListener('click', ()=>{
-    if (currentSection === 'main') openSection(menuKeys[currentIndex]);
-    else goBack();
-  });
-
-  menuButtons.forEach((btn,i) => {
-    btn.addEventListener('click', () => {
-      currentIndex = i;
-      renderMainSelection();
-      // open immediately on tap/click
-      openSection(menuKeys[currentIndex]);
-    });
-  });
-
-  // keyboard support
-  window.addEventListener('keydown', (e) => {
-    const key = e.key.toLowerCase();
-    if (currentSection === 'main') {
-      if (key === 'arrowleft' || key === 'arrowup') {
-        currentIndex = (currentIndex - 1 + menuKeys.length) % menuKeys.length;
-        renderMainSelection();
-      } else if (key === 'arrowright' || key === 'arrowdown') {
-        currentIndex = (currentIndex + 1) % menuKeys.length;
-        renderMainSelection();
-      } else if (key === 'enter' || key === ' ') {
-        e.preventDefault();
-        openSection(menuKeys[currentIndex]);
-      } else if (key === '1' || key === '2' || key === '3') {
-        // optional quick numeric access
-        const num = parseInt(key,10);
-        if (!isNaN(num) && num>=1 && num<=menuKeys.length){
-          currentIndex = num-1; renderMainSelection(); openSection(menuKeys[currentIndex]);
-        }
-      }
-    } else {
-      // inside a section
-      if (key === 'escape' || key === 'b') {
-        goBack();
-      }
+    function playTape() {
+      playing = true;
+      led.classList.add("active");
+      showMessage(tapes[index]);
     }
-  });
 
-  // accessibility: focus visible shortcuts
-  // (you can tab to buttons)
-</script>
+    function stopTape() {
+      playing = false;
+      led.classList.remove("active");
+      showMessage("⏹ Tape stopped.");
+    }
+
+    function nextTape() {
+      index = (index + 1) % tapes.length;
+      if (playing) playTape();
+      else showMessage(`Ready: ${tapes[index]}`);
+    }
+
+    function prevTape() {
+      index = (index - 1 + tapes.length) % tapes.length;
+      if (playing) playTape();
+      else showMessage(`Ready: ${tapes[index]}`);
+    }
+
+    playBtn.onclick = playTape;
+    stopBtn.onclick = stopTape;
+    nextBtn.onclick = nextTape;
+    prevBtn.onclick = prevTape;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") nextTape();
+      if (e.key === "ArrowLeft") prevTape();
+      if (e.key === " ") playTape();
+      if (e.key === "Escape") stopTape();
+    });
+
+    setTimeout(() => showMessage(`Ready: ${tapes[index]}`), 2500);
+  </script>
 </body>
 </html>
